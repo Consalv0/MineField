@@ -6,11 +6,40 @@ using System.Threading;
 namespace MineField {
   public class Program {
     public static void Main(string[] args) {
-      int[,] board = new int[20, 65];
-      int mines = 300;
+      int[] boardDim = new int[2];
+      for (int i = 0; i < boardDim.GetLength(0); i++) {
+        int input;
+        if (i == 0) {
+          Console.Write("Field Height: ");
+          input = StringtoInt(Console.ReadLine(), 10, 25);
+        } else {
+          Console.Write("Field Width: ");
+          input = StringtoInt(Console.ReadLine(), 10, 65);
+        }
+        boardDim[i] = input;
+      }
+      Console.Write("Number of Mines: ");
+      int mines = StringtoInt(Console.ReadLine(), 10,
+                  (int)Math.Floor((boardDim[0] * boardDim[1]) * 0.5));
+      int[,] board = new int[boardDim[0], boardDim[1]];
 
       placeMines(board, mines);
       print(board);
+    }
+
+    public static int StringtoInt(string value, int minValue, int maxValue) {
+      int number;
+      bool result = Int32.TryParse(value, out number);
+      if (result && number > minValue) {
+        if (number < maxValue) {
+         return number;
+        } else {
+         return maxValue;
+        }
+      } else {
+        Random range = GetRandom();
+        return range.Next(minValue, maxValue);
+      }
     }
 
     public static Random GetRandom() {
@@ -18,9 +47,8 @@ namespace MineField {
     }
 
     public static int[] posIn2D(int num, int lines, int columns) {
-      if (num >= lines * columns) {
-        return null;
-      }
+      if (num >= lines * columns) return null;
+
       float line = num / columns;
       int j = (int)Math.Floor(line);
       int k = (num - columns * j);
@@ -29,22 +57,24 @@ namespace MineField {
     }
 
     public static void placeMines(int[,] board, int mines) {
-      int[] shfBoard = new int[board.GetLength(0) * board.GetLength(1)];
+      int boardSize = board.GetLength(0) * board.GetLength(1);
+      mines = mines > boardSize ? boardSize : mines;
+      int[] board1D = new int[boardSize];
       for (int i = 0; i < mines; i++) {
-        shfBoard[i] += 1;
+        board1D[i] += 1;
       }
 
-      Random rng = GetRandom();
-      for (int i = shfBoard.GetLength(0) -1; i > 0; i--) {
-        int dice = rng.Next(i);
-        int num = shfBoard[dice];
+      Random range = GetRandom();
+      for (int i = boardSize -1; i >= 0; i--) {
+        int dice = range.Next(i +1);
+        int numOfDice = board1D[dice];
 
-        List<int> newShfBoard = shfBoard.ToList();
+        List<int> newShfBoard = board1D.ToList();
         newShfBoard.RemoveAt(dice);
-        shfBoard = newShfBoard.ToArray();
+        board1D = newShfBoard.ToArray();
 
-        int[] boardCoords = posIn2D(i, board.GetLength(0), board.GetLength(1));
-        board[boardCoords[0],boardCoords[1]] = num;
+        int[] boardPos = posIn2D(i, board.GetLength(0), board.GetLength(1));
+        board[boardPos[0],boardPos[1]] = numOfDice;
       }
     }
 
@@ -52,7 +82,12 @@ namespace MineField {
       Console.Write(Environment.NewLine);
       for (int i = 0; i < board.GetLength(0); i++) {
         for (int j = 0; j < board.GetLength(1); j++) {
-          Console.Write(string.Format("{0} ", board[i, j]));
+          if (board[i, j] == 1) {
+            Console.Write("● ");
+          } else {
+            Console.Write("○ ");
+          }
+          Thread.Sleep(1);
         }
         Console.Write(Environment.NewLine);
       }
