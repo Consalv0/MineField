@@ -5,17 +5,20 @@ using System.Threading;
 
 namespace MineField {
   public class Program {
+    public static int heigth = Console.WindowHeight;
+    public static int width = Console.WindowWidth;
+    public static int halfWidth = (int)Math.Floor(width * 0.5);
+    public static int halfHeigth = (int)Math.Floor(heigth * 0.99);
     public static void Main(string[] args) {
       int[] boardMetaDim = new int[2];
-
+      int input;
       for (int i = 0; i < boardMetaDim.GetLength(0); i++) {
-        int input;
         if (i == 0) {
           Console.Write("Field Height: ");
-          input = valueRange(Console.ReadLine(), 10, 29);
+          input = valueRange(Console.ReadLine(), 10, halfHeigth);
         } else {
           Console.Write("Field Width: ");
-          input = valueRange(Console.ReadLine(), 10, 65);
+          input = valueRange(Console.ReadLine(), 10, halfWidth);
         }
         boardMetaDim[i] = input;
       }
@@ -40,7 +43,7 @@ namespace MineField {
         if (number <= maxValue) {
          return number;
         } else {
-         return minValue;
+         return maxValue;
         }
       } else {
         Random range = GetRandom();
@@ -114,22 +117,14 @@ namespace MineField {
                   if (boardMeta[k, l] != 10) boardMeta[k, l] += 1;
               }}
             }}
-            Console.Write("⎈ ");
+            Console.Write("\u2388 ");
           } else {
-            Console.Write("○ ");
+            Console.Write("\u25CB ");
           }
           Thread.Sleep(1);
         }
         Console.Write(Environment.NewLine);
       }
-      Console.Clear();
-      for (int i = 0; i < boardMeta.GetLength(0); i++) {
-        for (int j = 0; j < boardMeta.GetLength(1); j++) {
-            Console.Write("◼ ");
-        }
-        Console.Write(Environment.NewLine);
-      }
-      Thread.Sleep(200);
     }
 
     public static void printBoard(string[,] board, int[] cursor = null) {
@@ -137,7 +132,7 @@ namespace MineField {
       for (int i = 0; i < board.GetLength(0); i++) {
         for (int j = 0; j < board.GetLength(1); j++) {
           if (cursor != null && cursor[0] == i && cursor[1] == j) {
-            Console.Write("◼ ");
+            Console.Write("\u25FC ");
           } else {
             refreshPos(board, i, j);
           }
@@ -149,7 +144,7 @@ namespace MineField {
     public static void refreshPos(string[,] board, int x, int y, int[] cursor = null) {
       Console.SetCursorPosition(y * 2, x);
       if (cursor != null && cursor[0] == x && cursor[1] == y) {
-        Console.Write("◼ ");
+        Console.Write("\u25FC ");
       } else {
         string element = board[x, y];
         if (element == "0") {
@@ -180,15 +175,15 @@ namespace MineField {
           Console.ForegroundColor = ConsoleColor.DarkCyan;
         }
         if (element == "9") {
-          element = "ᚹ";
+          element = "\u16B9";
           Console.ForegroundColor = ConsoleColor.Red;
         }
         if (element == "10") {
-          element = "⎈";
+          element = "\u2388";
           Console.ForegroundColor = ConsoleColor.Red;
         }
         if (element == "11") {
-          element = "⎈";
+          element = "\u2388";
           Console.ForegroundColor = ConsoleColor.Green;
         }
         Console.Write(element + " ");
@@ -215,7 +210,7 @@ namespace MineField {
           if (i >= 0 && i < boardMeta.GetLength(0)) {
           if (j >= 0 && j < boardMeta.GetLength(1)) {
             if (boardMeta[i, j] < 10) {
-              if (board[i, j] == "□") {
+              if (board[i, j] == "\u25A1") {
                 board[i, j] = boardMeta[i, j] == 0 ? " " : "" + boardMeta[i, j];
                 int[] newPos = {i, j};
                 reveal(boardMeta, board, newPos);
@@ -224,9 +219,9 @@ namespace MineField {
             }
           }}
         }}
-      } else if (boardMeta[pos[0], pos[1]] < 10) {
+      } else if (boardMeta[pos[0], pos[1]] < 9) {
         board[pos[0], pos[1]] = "" + boardMeta[pos[0], pos[1]];
-      } else {
+      } else if (boardMeta[pos[0], pos[1]] == 10) {
         for (int i = 0; i < board.GetLength(0); i++) {
           for (int j = 0; j < board.GetLength(1); j++) {
             board[i, j] = "" + boardMeta[i, j];
@@ -238,7 +233,7 @@ namespace MineField {
 
     public static void placeFlag(int[,] boardMeta, string[,] board, int[] cursor, ref int flags, int mines) {
       int concurrences = 0;
-      if (board[cursor[0], cursor[1]] == "□" && flags > 0) {
+      if (board[cursor[0], cursor[1]] == "\u25A1" && flags > 0) {
         flags -= 1;
         board[cursor[0], cursor[1]] = "9";
         if (boardMeta[cursor[0], cursor[1]] == 10) {
@@ -246,7 +241,10 @@ namespace MineField {
         }
       } else if (board[cursor[0], cursor[1]] == "9") {
         flags += 1;
-        board[cursor[0], cursor[1]] = "□";
+        board[cursor[0], cursor[1]] = "\u25A1";
+        if (boardMeta[cursor[0], cursor[1]] == 11) {
+          boardMeta[cursor[0], cursor[1]] = 10;
+        }
       }
       if (flags <= 0) {
         for (int i = 0; i < board.GetLength(0); i++) {
@@ -261,9 +259,9 @@ namespace MineField {
           printBoard(board);
         }
       }
-      Console.SetCursorPosition(100, 0);
+      Console.SetCursorPosition(halfWidth -8, 0);
       Console.Write("Flags: " + flags + "   ");
-      Console.SetCursorPosition(100, 1);
+      Console.SetCursorPosition(halfWidth -8, 1);
       Console.Write("Mines: " + mines);
       // Console.SetCursorPosition(100, 2);
       // Console.Write("Acerted Flags: " + concurrences);
@@ -274,11 +272,16 @@ namespace MineField {
       ConsoleKeyInfo keyPress;
       for (int i = 0; i < board.GetLength(0); i++) {
         for (int j = 0; j < board.GetLength(1); j++) {
-          board[i, j] = "□";
+          board[i, j] = "\u25A1";
         }
       }
       printBoard(board, cursor);
+
       int flags = mines;
+      Console.SetCursorPosition(halfWidth -8, 0);
+      Console.Write("Flags: " + flags + " ");
+      Console.SetCursorPosition(halfWidth -8, 1);
+      Console.Write("Mines: " + mines);
 
       do {
         keyPress = Console.ReadKey(true);
