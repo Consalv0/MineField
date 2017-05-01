@@ -12,34 +12,35 @@ namespace MineField {
         int input;
         if (i == 0) {
           Console.Write("Field Height: ");
-          input = valueRange(Console.ReadLine(), 10, 29);
+          input = valueRange(Console.ReadLine(), 5, 29);
         } else {
           Console.Write("Field Width: ");
-          input = valueRange(Console.ReadLine(), 10, 65);
+          input = valueRange(Console.ReadLine(), 5, 65);
         }
         boardMetaDim[i] = input;
       }
       Console.Write("Number of Mines: ");
 
-      int mines = valueRange(Console.ReadLine(), 10,
-                  (int)Math.Floor((boardMetaDim[0] * boardMetaDim[1]) * 0.5));
+      int mines = valueRange(Console.ReadLine(), 5,
+                  (int)Math.Floor((boardMetaDim[0] * boardMetaDim[1]) * 0.3));
       int[,] boardMeta = new int[boardMetaDim[0], boardMetaDim[1]];
       string[,] board = new string[boardMetaDim[0], boardMetaDim[1]];
-      int[] cursor = {0, 0};
+      int[] cursor = {(int)Math.Floor(boardMetaDim[0] * 0.5),
+                      (int)Math.Floor(boardMetaDim[1] * 0.5)};
 
       placeMines(boardMeta, mines);
       firstPrint(boardMeta);
-      keyListener(board, cursor);
+      keyListener(boardMeta, board, cursor, mines);
     }
 
     public static int valueRange(string value, int minValue, int maxValue) {
       int number;
       bool result = Int32.TryParse(value, out number);
-      if (result && number > minValue) {
-        if (number < maxValue) {
+      if (result && number >= minValue) {
+        if (number <= maxValue) {
          return number;
         } else {
-         return maxValue;
+         return minValue;
         }
       } else {
         Random range = GetRandom();
@@ -61,12 +62,30 @@ namespace MineField {
       return coords;
     }
 
+    public static int[] findPosOf(string[,] board, string element, int[] cursor = null) {
+      for (int x = 0; x < board.GetLength(0); ++x) {
+        for (int y = 0; y < board.GetLength(1); ++y) {
+          if (board[x, y] == element) {
+            if (cursor != null) {
+              cursor[0] = x;
+              cursor[1] = y;
+            } else {
+              int[] pos = {x, y};
+              return pos;
+            }
+          }
+        }
+      }
+      int[] r = {0, 0};
+      return r;
+    }
+
     public static void placeMines(int[,] boardMeta, int mines) {
       int boardMetaSize = boardMeta.GetLength(0) * boardMeta.GetLength(1);
       mines = mines > boardMetaSize ? boardMetaSize : mines;
       int[] boardMeta1D = new int[boardMetaSize];
       for (int i = 0; i < mines; i++) {
-        boardMeta1D[i] += 1;
+        boardMeta1D[i] += 10;
       }
 
       Random range = GetRandom();
@@ -87,7 +106,14 @@ namespace MineField {
       Console.Clear();
       for (int i = 0; i < boardMeta.GetLength(0); i++) {
         for (int j = 0; j < boardMeta.GetLength(1); j++) {
-          if (boardMeta[i, j] == 1) {
+          if (boardMeta[i, j] == 10) {
+            for (int k = i -1; k < i + 2; k++) {
+            for (int l = j -1; l < j + 2; l++) {
+              if (k >= 0 && k < boardMeta.GetLength(0)) {
+              if (l >= 0 && l < boardMeta.GetLength(1)) {
+                  if (boardMeta[k, l] != 10) boardMeta[k, l] += 1;
+              }}
+            }}
             Console.Write("⎈ ");
           } else {
             Console.Write("○ ");
@@ -106,75 +132,175 @@ namespace MineField {
       Thread.Sleep(200);
     }
 
-    public static void printBoard(string[,] board) {
+    public static void printBoard(string[,] board, int[] cursor = null) {
       Console.Clear();
       for (int i = 0; i < board.GetLength(0); i++) {
         for (int j = 0; j < board.GetLength(1); j++) {
-          if (board[i, j] == "◼") {
+          if (cursor != null && cursor[0] == i && cursor[1] == j) {
             Console.Write("◼ ");
           } else {
-            Console.Write("□ ");
+            refreshPos(board, i, j);
           }
         }
         Console.Write(Environment.NewLine);
       }
     }
 
-    public static void moveCursor(string[,] board, int[] cursor, int column, int row) {
+    public static void refreshPos(string[,] board, int x, int y, int[] cursor = null) {
+      Console.SetCursorPosition(y * 2, x);
+      if (cursor != null && cursor[0] == x && cursor[1] == y) {
+        Console.Write("◼ ");
+      } else {
+        string element = board[x, y];
+        if (element == "0") {
+          element = " ";
+        }
+        if (element == "1") {
+          Console.ForegroundColor = ConsoleColor.Blue;
+        }
+        if (element == "2") {
+          Console.ForegroundColor = ConsoleColor.Magenta;
+        }
+        if (element == "3") {
+          Console.ForegroundColor = ConsoleColor.Yellow;
+        }
+        if (element == "4") {
+          Console.ForegroundColor = ConsoleColor.Cyan;
+        }
+        if (element == "5") {
+          Console.ForegroundColor = ConsoleColor.DarkBlue;
+        }
+        if (element == "6") {
+          Console.ForegroundColor = ConsoleColor.DarkMagenta;
+        }
+        if (element == "7") {
+          Console.ForegroundColor = ConsoleColor.DarkYellow;
+        }
+        if (element == "8") {
+          Console.ForegroundColor = ConsoleColor.DarkCyan;
+        }
+        if (element == "9") {
+          element = "ᚹ";
+          Console.ForegroundColor = ConsoleColor.Red;
+        }
+        if (element == "10") {
+          element = "⎈";
+          Console.ForegroundColor = ConsoleColor.Red;
+        }
+        if (element == "11") {
+          element = "⎈";
+          Console.ForegroundColor = ConsoleColor.Green;
+        }
+        Console.Write(element + " ");
+        Console.ResetColor();
+      }
+    }
+
+    public static void moveCursor(int[,] boardMeta, string[,] board, int[] cursor, int columns, int rows) {
       int boardRows = board.GetLength(0);
       int boardColumns = board.GetLength(1);
-      if (cursor[0] + row > boardRows && cursor[0] + row <= 0) return;
-      if (cursor[1] + column > boardColumns && cursor[1] + column <= 0) return;
+      if (cursor[0] + columns > boardRows -1 || cursor[0] + columns < 0) return;
+      if (cursor[1] + rows > boardColumns -1 || cursor[1] + rows < 0) return;
 
-      board[cursor[0], cursor[1]] = "";
-      Console.SetCursorPosition(cursor[1] * 2, cursor[0]);
-      Console.Write("□ ");
-      Console.SetCursorPosition((cursor[1] + row)* 2, cursor[0] + column);
-      Console.Write("◼ ");
-
-      board[cursor[0] + column, cursor[1] + row] = "◼";
-      findPosOf(board, "◼", cursor);
+      cursor[0] += columns;
+      cursor[1] += rows;
+      refreshPos(board, cursor[0] - columns, cursor[1] - rows);
+      refreshPos(board, cursor[0], cursor[1], cursor);
     }
 
-    public static int[] findPosOf(string[,] board, string element, int[] cursor = null) {
-      for (int x = 0; x < board.GetLength(0); ++x) {
-        for (int y = 0; y < board.GetLength(1); ++y) {
-          if (board[x, y] == element) {
-            if (cursor != null) {
-              cursor[0] = x;
-              cursor[1] = y;
-            } else {
-              int[] pos = {x, y};
-              return pos;
+    public static void reveal(int[,] boardMeta, string[,] board, int[] pos) {
+      if (boardMeta[pos[0], pos[1]] == 0) {
+        for (int i = pos[0] -1; i < pos[0] + 2; i++) {
+        for (int j = pos[1] -1; j < pos[1] + 2; j++) {
+          if (i >= 0 && i < boardMeta.GetLength(0)) {
+          if (j >= 0 && j < boardMeta.GetLength(1)) {
+            if (boardMeta[i, j] < 10) {
+              if (board[i, j] == "□") {
+                board[i, j] = boardMeta[i, j] == 0 ? " " : "" + boardMeta[i, j];
+                int[] newPos = {i, j};
+                reveal(boardMeta, board, newPos);
+              }
+            refreshPos(board, i, j);
             }
+          }}
+        }}
+      } else if (boardMeta[pos[0], pos[1]] < 10) {
+        board[pos[0], pos[1]] = "" + boardMeta[pos[0], pos[1]];
+      } else {
+        for (int i = 0; i < board.GetLength(0); i++) {
+          for (int j = 0; j < board.GetLength(1); j++) {
+            board[i, j] = "" + boardMeta[i, j];
           }
         }
+        printBoard(board);
       }
-      int[] r = {0, 0};
-      return r;
     }
 
-    public static void keyListener(string[,] board, int[] cursor) {
+    public static void placeFlag(int[,] boardMeta, string[,] board, int[] cursor, ref int flags, int mines) {
+      int concurrences = 0;
+      if (board[cursor[0], cursor[1]] == "□" && flags > 0) {
+        flags -= 1;
+        board[cursor[0], cursor[1]] = "9";
+        if (boardMeta[cursor[0], cursor[1]] == 10) {
+          boardMeta[cursor[0], cursor[1]] = 11;
+        }
+      } else if (board[cursor[0], cursor[1]] == "9") {
+        flags += 1;
+        board[cursor[0], cursor[1]] = "□";
+      }
+      if (flags <= 0) {
+        for (int i = 0; i < board.GetLength(0); i++) {
+        for (int j = 0; j < board.GetLength(1); j++) {
+          if (boardMeta[i, j] == 11) concurrences++;
+        }}
+        if (concurrences == mines) {
+          for (int i = 0; i < board.GetLength(0); i++) {
+          for (int j = 0; j < board.GetLength(1); j++) {
+            board[i, j] = "" + boardMeta[i, j];
+          }}
+          printBoard(board);
+        }
+      }
+      Console.SetCursorPosition(100, 0);
+      Console.Write("Flags: " + flags + "   ");
+      Console.SetCursorPosition(100, 1);
+      Console.Write("Mines: " + mines);
+      Console.SetCursorPosition(100, 2);
+      // Console.Write("Acerted Flags: " + concurrences);
+    }
+
+    public static void keyListener(int[,] boardMeta, string[,] board, int[] cursor, int mines) {
       ConsoleKeyInfo keyPress;
-      board[(int)Math.Floor(board.GetLength(0) * 0.5),
-            (int)Math.Floor(board.GetLength(1) * 0.5)] = "◼";
-      findPosOf(board, "◼", cursor);
-      printBoard(board);
+      for (int i = 0; i < board.GetLength(0); i++) {
+        for (int j = 0; j < board.GetLength(1); j++) {
+          board[i, j] = "□";
+        }
+      }
+      printBoard(board, cursor);
+      int flags = mines;
 
       do {
-        keyPress = Console.ReadKey();
+        keyPress = Console.ReadKey(true);
 
         if(keyPress.Key == ConsoleKey.UpArrow) {
-          moveCursor(board, cursor, -1, 0);
+          moveCursor(boardMeta, board, cursor, -1, 0);
         }
         if(keyPress.Key == ConsoleKey.DownArrow) {
-          moveCursor(board, cursor, 1, 0);
+          moveCursor(boardMeta, board, cursor, 1, 0);
         }
         if(keyPress.Key == ConsoleKey.LeftArrow) {
-          moveCursor(board, cursor, 0, -1);
+          moveCursor(boardMeta, board, cursor, 0, -1);
         }
         if(keyPress.Key == ConsoleKey.RightArrow) {
-          moveCursor(board, cursor, 0, 1);
+          moveCursor(boardMeta, board, cursor, 0, 1);
+        }
+
+        if(keyPress.Key == ConsoleKey.Spacebar) {
+          reveal(boardMeta, board, cursor);
+        }
+
+        if(keyPress.Key == ConsoleKey.F) {
+          placeFlag(boardMeta, board, cursor, ref flags, mines);
         }
       } while (keyPress.Key != ConsoleKey.Escape);
     }
