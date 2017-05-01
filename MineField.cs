@@ -12,16 +12,16 @@ namespace MineField {
         int input;
         if (i == 0) {
           Console.Write("Field Height: ");
-          input = valueRange(Console.ReadLine(), 5, 29);
+          input = valueRange(Console.ReadLine(), 10, 29);
         } else {
           Console.Write("Field Width: ");
-          input = valueRange(Console.ReadLine(), 5, 65);
+          input = valueRange(Console.ReadLine(), 10, 65);
         }
         boardMetaDim[i] = input;
       }
       Console.Write("Number of Mines: ");
 
-      int mines = valueRange(Console.ReadLine(), 5,
+      int mines = valueRange(Console.ReadLine(), 10,
                   (int)Math.Floor((boardMetaDim[0] * boardMetaDim[1]) * 0.3));
       int[,] boardMeta = new int[boardMetaDim[0], boardMetaDim[1]];
       string[,] board = new string[boardMetaDim[0], boardMetaDim[1]];
@@ -265,11 +265,12 @@ namespace MineField {
       Console.Write("Flags: " + flags + "   ");
       Console.SetCursorPosition(100, 1);
       Console.Write("Mines: " + mines);
-      Console.SetCursorPosition(100, 2);
+      // Console.SetCursorPosition(100, 2);
       // Console.Write("Acerted Flags: " + concurrences);
     }
 
     public static void keyListener(int[,] boardMeta, string[,] board, int[] cursor, int mines) {
+      Console.CursorVisible = false;
       ConsoleKeyInfo keyPress;
       for (int i = 0; i < board.GetLength(0); i++) {
         for (int j = 0; j < board.GetLength(1); j++) {
