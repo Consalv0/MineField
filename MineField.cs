@@ -319,11 +319,35 @@ namespace MineField {
     public static void endMenu(int[] boardMetaDim, int[,] boardMeta, string[,] board, int[] cursor, int mines) {
       Console.CursorVisible = true;
       ConsoleKeyInfo keyPress;
-      Console.SetCursorPosition(0, halfHeigth);
-      Console.Write("Restart Game? 'Y'");
+      Console.SetCursorPosition(0, halfHeigth -1);
+      Console.WriteLine("Restart Game? 'Y'");
+      Console.Write("Change Values? 'C'");
 
       do {
         keyPress = Console.ReadKey(true);
+
+        if(keyPress.Key == ConsoleKey.C) {
+          int input;
+          for (int i = 0; i < boardMetaDim.GetLength(0); i++) {
+            if (i == 0) {
+              Console.Write(Environment.NewLine);
+              Console.Write("Field Height: ");
+              input = valueRange(Console.ReadLine(), 10, halfHeigth);
+            } else {
+              Console.Write("Field Width: ");
+              input = valueRange(Console.ReadLine(), 10, halfWidth);
+            }
+            boardMetaDim[i] = input;
+          }
+          Console.Write("Number of Mines: ");
+
+          mines = valueRange(Console.ReadLine(), 10,
+                (int)Math.Floor((boardMetaDim[0] * boardMetaDim[1]) * 0.3));
+          Console.Write(Environment.NewLine);
+          Console.WriteLine("Restart Game? 'Y'");
+          cursor[0] = (int)Math.Floor(boardMetaDim[0] * 0.5);
+          cursor[1] = (int)Math.Floor(boardMetaDim[1] * 0.5);
+        }
 
         if(keyPress.Key == ConsoleKey.Y) {
           boardMeta = new int[boardMetaDim[0], boardMetaDim[1]];
@@ -332,6 +356,7 @@ namespace MineField {
           placeMines(boardMeta, mines);
           firstPrint(boardMeta);
           keyListener(boardMeta, board, cursor, mines);
+          endMenu(boardMetaDim, boardMeta, board, cursor, mines);
         }
       } while (keyPress.Key != ConsoleKey.Y && keyPress.Key != ConsoleKey.N && keyPress.Key != ConsoleKey.Escape);
     }
