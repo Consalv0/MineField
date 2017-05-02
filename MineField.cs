@@ -10,6 +10,7 @@ namespace MineField {
     public static int halfWidth = (int)Math.Floor(width * 0.5);
     public static int halfHeigth = (int)Math.Floor(heigth * 0.99);
     public static void Main(string[] args) {
+      Console.OutputEncoding = Encoding.UTF7;
       int[] boardMetaDim = new int[2];
       int input;
       for (int i = 0; i < boardMetaDim.GetLength(0); i++) {
