@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading;
 
 namespace MineField {
@@ -10,7 +11,7 @@ namespace MineField {
     public static int halfWidth = (int)Math.Floor(width * 0.5);
     public static int halfHeigth = (int)Math.Floor(heigth * 0.99);
     public static void Main(string[] args) {
-      Console.OutputEncoding = Encoding.UTF7;
+      Console.OutputEncoding = Encoding.UTF8;
       int[] boardMetaDim = new int[2];
       int input;
       for (int i = 0; i < boardMetaDim.GetLength(0); i++) {
@@ -35,6 +36,7 @@ namespace MineField {
       placeMines(boardMeta, mines);
       firstPrint(boardMeta);
       keyListener(boardMeta, board, cursor, mines);
+      endMenu(boardMetaDim, boardMeta, board, cursor, mines);
     }
 
     public static int valueRange(string value, int minValue, int maxValue) {
@@ -204,7 +206,7 @@ namespace MineField {
       refreshPos(board, cursor[0], cursor[1], cursor);
     }
 
-    public static void reveal(int[,] boardMeta, string[,] board, int[] pos) {
+    public static bool reveal(int[,] boardMeta, string[,] board, int[] pos) {
       if (boardMeta[pos[0], pos[1]] == 0) {
         for (int i = pos[0] -1; i < pos[0] + 2; i++) {
         for (int j = pos[1] -1; j < pos[1] + 2; j++) {
@@ -220,8 +222,10 @@ namespace MineField {
             }
           }}
         }}
+        return false;
       } else if (boardMeta[pos[0], pos[1]] < 9) {
         board[pos[0], pos[1]] = "" + boardMeta[pos[0], pos[1]];
+        return false;
       } else if (boardMeta[pos[0], pos[1]] == 10) {
         for (int i = 0; i < board.GetLength(0); i++) {
           for (int j = 0; j < board.GetLength(1); j++) {
@@ -229,7 +233,9 @@ namespace MineField {
           }
         }
         printBoard(board);
+        return true;
       }
+      return false;
     }
 
     public static void placeFlag(int[,] boardMeta, string[,] board, int[] cursor, ref int flags, int mines) {
@@ -301,13 +307,33 @@ namespace MineField {
         }
 
         if(keyPress.Key == ConsoleKey.Spacebar) {
-          reveal(boardMeta, board, cursor);
+          if(reveal(boardMeta, board, cursor)) break;
         }
 
         if(keyPress.Key == ConsoleKey.F) {
           placeFlag(boardMeta, board, cursor, ref flags, mines);
         }
       } while (keyPress.Key != ConsoleKey.Escape);
+    }
+
+    public static void endMenu(int[] boardMetaDim, int[,] boardMeta, string[,] board, int[] cursor, int mines) {
+      Console.CursorVisible = true;
+      ConsoleKeyInfo keyPress;
+      Console.SetCursorPosition(0, halfHeigth);
+      Console.Write("Restart Game? 'Y'");
+
+      do {
+        keyPress = Console.ReadKey(true);
+
+        if(keyPress.Key == ConsoleKey.Y) {
+          boardMeta = new int[boardMetaDim[0], boardMetaDim[1]];
+          board = new string[boardMetaDim[0], boardMetaDim[1]];
+
+          placeMines(boardMeta, mines);
+          firstPrint(boardMeta);
+          keyListener(boardMeta, board, cursor, mines);
+        }
+      } while (keyPress.Key != ConsoleKey.Y && keyPress.Key != ConsoleKey.N && keyPress.Key != ConsoleKey.Escape);
     }
   }
 }
