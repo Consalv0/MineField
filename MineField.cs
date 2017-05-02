@@ -124,8 +124,8 @@ namespace MineField {
           } else {
             Console.Write("\u25CB ");
           }
-          Thread.Sleep(1);
         }
+        Thread.Sleep(10);
         Console.Write(Environment.NewLine);
       }
     }
@@ -328,14 +328,25 @@ namespace MineField {
 
         if(keyPress.Key == ConsoleKey.C) {
           int input;
+          string number;
           for (int i = 0; i < boardMetaDim.GetLength(0); i++) {
             if (i == 0) {
               Console.Write(Environment.NewLine);
               Console.Write("Field Height: ");
-              input = valueRange(Console.ReadLine(), 10, halfHeigth);
+              number = Console.ReadLine();
+              if (number == "") {
+                input = board.GetLength(i) -1;
+              } else {
+                input = valueRange(number, 10, halfHeigth);
+              }
             } else {
               Console.Write("Field Width: ");
-              input = valueRange(Console.ReadLine(), 10, halfWidth);
+              number = Console.ReadLine();
+              if (number == "") {
+                input = board.GetLength(i) -1;
+              } else {
+                input = valueRange(number, 10, halfWidth);
+              }
             }
             boardMetaDim[i] = input;
           }
@@ -343,8 +354,9 @@ namespace MineField {
 
           mines = valueRange(Console.ReadLine(), 10,
                 (int)Math.Floor((boardMetaDim[0] * boardMetaDim[1]) * 0.3));
+
           Console.Write(Environment.NewLine);
-          Console.WriteLine("Restart Game? 'Y'");
+          Console.WriteLine("Restart Game? 'Y/N'");
           cursor[0] = (int)Math.Floor(boardMetaDim[0] * 0.5);
           cursor[1] = (int)Math.Floor(boardMetaDim[1] * 0.5);
         }
