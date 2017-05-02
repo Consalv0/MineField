@@ -1,6 +1,5 @@
--.DS_Store
--node_modules
--project.json
--project.lock.json
--bin
--obj
+.DS_Store
+node_modules
+project.lock.json
+bin
+obj
