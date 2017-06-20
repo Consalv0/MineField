@@ -325,15 +325,35 @@ namespace MineField {
 
 				if (keyPress.Key == ConsoleKey.UpArrow) {
 					MoveCursor(board, cursor, -1, 0);
+					if (firstMove) {
+						FirstTry(boardMetaDim, ref boardMeta, ref board, cursor, mines);
+					} else {
+						if (Reveal(boardMeta, board, cursor)) break;
+					}
 				}
 				if (keyPress.Key == ConsoleKey.DownArrow) {
 					MoveCursor(board, cursor, 1, 0);
+					if (firstMove) {
+						FirstTry(boardMetaDim, ref boardMeta, ref board, cursor, mines);
+					} else {
+						if (Reveal(boardMeta, board, cursor)) break;
+					}
 				}
 				if (keyPress.Key == ConsoleKey.LeftArrow) {
 					MoveCursor(board, cursor, 0, -1);
+					if (firstMove) {
+						FirstTry(boardMetaDim, ref boardMeta, ref board, cursor, mines);
+					} else {
+						if (Reveal(boardMeta, board, cursor)) break;
+					}
 				}
 				if (keyPress.Key == ConsoleKey.RightArrow) {
 					MoveCursor(board, cursor, 0, 1);
+					if (firstMove) {
+						FirstTry(boardMetaDim, ref boardMeta, ref board, cursor, mines);
+					} else {
+						if (Reveal(boardMeta, board, cursor)) break;
+					}
 				}
 
 				if (keyPress.Key == ConsoleKey.Spacebar) {
