@@ -1,4 +1,9 @@
-/[Ll]ibrary/
+.DS_Store
+ node_modules
+ project.lock.json
+ bin
+
+ /[Ll]ibrary/
 /[Tt]emp/
 /[Oo]bj/
 /[Bb]uild/

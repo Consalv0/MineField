@@ -8,6 +8,6 @@
   },
   "scripts": {
     "start": "dotnet run",
-    "mono": "mcs Program.cs && mono MineField.exe"
+    "mono": "mcs Program.cs -out:'MineField.exe' && mono MineField.exe"
   }
 }
